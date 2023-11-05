@@ -1,3 +1,4 @@
 [submodule "lothrik"]
 	path = lothrik
-	url = git@github.com:Lothrik/diablo4-build-calc.git
+	url = git@github.com:bje259/diablo4-build-calc.git
+	branch = master
