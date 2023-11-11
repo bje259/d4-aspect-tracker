@@ -12,8 +12,10 @@
     Textarea,
     Button,
   } from 'flowbite-svelte'
-  import type { AspectData, OwnedAspects } from './lib/types'
+  import type { AspectData, OwnedAspects, OwnedAspect } from './lib/types'
   import Aspect from './lib/Aspect.svelte'
+
+  import { showSlotBasedViewStore, slotFilterStore } from './store.js'
 
   let classes = [
     { value: '', name: 'All Classes' },
@@ -51,6 +53,22 @@
     { value: 'Shield', name: 'Shield' },
   ]
 
+  let realSlots = [
+    { value: 'Helmet', name: 'Helmet' },
+    { value: 'Chest', name: 'Chest' },
+    { value: 'Gloves', name: 'Gloves' },
+    { value: 'Pants', name: 'Pants' },
+    { value: 'Boots', name: 'Boots' },
+    { value: 'Weapon', name: 'Weapon' },
+    { value: 'Offhand', name: 'Offhand' },
+    { value: 'Amulet', name: 'Amulet' },
+    { value: 'Ring', name: 'Ring' },
+    { value: 'Shield', name: 'Shield' },
+  ]
+
+  //new section for slot based sorting
+  //let showSlotBasedView = $showSlotBasedViewStore
+
   let aspects = []
   let selectedClass = ''
   let searchTerm = ''
@@ -59,7 +77,7 @@
   let selectedCodex = ''
   let ownedAspectsString = ''
   let importAspectsString = ''
-
+  let filteredSlot = ''
   let importModal = false
   let exportModal = false
 
@@ -93,7 +111,8 @@
   }
 
   let ownedAspects: OwnedAspects = {}
-
+  let filteredOwned: OwnedAspects = {}
+  $: console.log($showSlotBasedViewStore)
   async function getAspects() {
     const aspects_db_url = '/aspects.json'
 
@@ -255,7 +274,7 @@
       } else if (selectedSlot === 'Shield') {
         return aspect.category === 'Defensive' || aspect.category === 'Utility'
       } else {
-        return aspect.slot === selectedSlot
+        return false
       }
     })
     .sort((a, b) => {
@@ -332,10 +351,10 @@
           >Github</a
         >
       </p>
-      <p>
+      <!-- <p>
         Localization (language) and Export/Import in the menu on the top left.
-      </p></span
-    >
+      </p> -->
+    </span>
     <span />
   </p>
 </Banner>
@@ -392,25 +411,78 @@
       bind:value={selectedCodex}
     />
     <div class="mt-2">
-      <Checkbox class="text-base" bind:checked={limitToOwned}>
+      <Checkbox class="text-base" name="lto" bind:checked={limitToOwned}>
         Limit to owned
       </Checkbox>
     </div>
-  </div>
 
-  <div
-    class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-  >
-    {#if aspects.length > 0}
-      {#each filteredAspects as aspect}
-        <Aspect
-          {aspect}
-          {selectedLocalization}
-          on:aspectUpdated={handleAspectUpdated}
+    {#if limitToOwned}
+      <div class="flex items-center mb-4">
+        <input
+          id="sbv"
+          type="checkbox"
+          value=""
+          bind:checked={$showSlotBasedViewStore}
+          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
         />
-      {/each}
-    {:else}
-      <Spinner />
+        <label
+          for="sbv"
+          class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+          >Show Slot Based View</label
+        >
+      </div>
+
+      <!--<div>
+        <Checkbox class="text-base" name="sbv" bind:checked={$showSlotBasedViewStore}>
+          Show Slot Based View
+        </Checkbox>
+      </div>-->
+      <!--<Checkbox bind:checked={showSlotBasedView}>Show Slot Based View</Checkbox>-->
     {/if}
   </div>
+
+  {#if $showSlotBasedViewStore}
+    {#each realSlots as slot}
+      <div class="mb-8 flex flex-col">
+        {#if getAspectsForSlot(slot.value).length > 0}
+          {#each setCurrentSlotFilter(slot.value) as aspect}
+            <Aspect
+              {aspect}
+              {selectedLocalization}
+              on:aspectUpdated={handleAspectUpdated}
+            />
+          {/each}
+        {/if}
+      </div>
+    {/each}
+  {:else}
+    <div
+      class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+    >
+      {#if filteredAspects.length > 0}
+        {#each filteredAspects as aspect}
+          <Aspect
+            {aspect}
+            {selectedLocalization}
+            on:aspectUpdated={handleAspectUpdated}
+          />
+        {/each}
+      {:else}
+        <Spinner />
+      {/if}
+    </div>
+  {/if}
+
+  <script>
+    // ...
+
+    function setCurrentSlotFilter(slot) {
+      const filteredAspects = ownedAspects.filter(
+        (aspect) => aspect.slot === slot
+      )
+      return filteredAspects
+    }
+
+    // ...
+  </script>
 </div>
