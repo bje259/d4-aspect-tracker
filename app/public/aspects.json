@@ -3923,7 +3923,7 @@
   },
   "of Audacity": {
     "category": "Utility",
-    "in_codex": true,
+    "in_codex": false,
     "class": "Generic",
     "name_localized": {
       "deDE": "der Kühnheit",
@@ -7508,30 +7508,6 @@
       "zhCN": "收集爆裂电花也会使你的移动速度提高 +{10/15}%, 持续 8.0 秒。",
       "zhTW": "收集電流能量會使移動速度提高 +{10/15}%,持續 8.0 秒。",
       "enUS": "Collecting Crackling Energy increases your Movement Speed by +{10/15}% for 8.0 seconds."
-    }
-  },
-  "(PH) of Ensnaring Current": {
-    "category": "Offensive",
-    "in_codex": false,
-    "class": "Sorcerer",
-    "name_localized": {
-      "enUS": "(PH) of Ensnaring Current"
-    },
-    "desc_localized": {
-      "deDE": "Kugelblitz zieht Gegner auf seinem Weg mit sich.",
-      "esES": "Bola de rayos atrae a los enemigos durante su desplazamiento.",
-      "esMX": "Rayo Globular arrastra a los enemigos a medida que se desplaza.",
-      "frFR": "Sphère foudroyante attire les adversaires sur son chemin.",
-      "itIT": "Palla Fulminante attira i nemici lungo la sua traiettoria.",
-      "jaJP": "〈ボール・ライトニング〉が敵を引き寄せつつ移動する。",
-      "koKR": "구상 번개가 이동하면서 적들을 끌어당깁니다.",
-      "plPL": "Przemieszczający się Piorun Kulisty przyciąga do siebie wrogów.",
-      "ptBR": "Bola de Eletricidade puxa inimigos durante o trajeto.",
-      "ruRU": "\"Шаровая молния\" тянет за собой противников.",
-      "trTR": "Yıldırım Topu hareket ettikçe düşmanları kendine çeker.",
-      "zhCN": "球状闪电会拖拽敌人一起前进。",
-      "zhTW": "球狀閃電移動時會拉動敵人。",
-      "enUS": "Ball Lightning pulls enemies with it as it travels."
     }
   },
   "of Frozen Orbit": {
