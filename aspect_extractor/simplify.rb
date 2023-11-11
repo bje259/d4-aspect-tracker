@@ -39,8 +39,7 @@ seasonal_aspects = [
     "of Imitated Imbument",
     "of Decay",
     "Subterranean",
-    "Craven",
-    "of Audacity"
+    "Craven"
 ]
 
 for pclass in codex_file_json.keys

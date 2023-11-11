@@ -2,6 +2,7 @@
   import { Button } from 'flowbite-svelte'
   import { createEventDispatcher } from 'svelte'
   import type { OwnedAspect } from './types'
+  import { showSlotBasedViewStore, slotFilterStore } from '../store.js'
 
   export let aspectName
   export let ownedAspects: OwnedAspect[] = []
@@ -29,19 +30,38 @@
 
 <div class="mb-4 grid grid-cols-2 gap-4">
   {#each ownedAspects as ownedAspect, index}
-    <div class="p-1 md:p-2 flex items-center">
-      <div class="flex flex-col">
-        <div class="text-xl mb-2">{ownedAspect.note}</div>
-        <div class="text-sm">{ownedAspect.note_long || ''}</div>
+    {#if $showSlotBasedViewStore && ($slotFilterStore === ' ' || ownedAspect.note
+          .toLowerCase()
+          .includes($slotFilterStore.toLowerCase()))}
+      <div class="p-1 md:p-2 flex items-center">
+        <div class="flex flex-col">
+          <div class="text-xl mb-2">{ownedAspect.note}</div>
+          <div class="text-sm">{ownedAspect.note_long || ''}</div>
+        </div>
+        <Button
+          class="ml-auto"
+          color="red"
+          outline
+          on:click={() => deleteOwnedAspect(index)}
+        >
+          X
+        </Button>
       </div>
-      <Button
-        class="ml-auto"
-        color="red"
-        outline
-        on:click={() => deleteOwnedAspect(index)}
-      >
-        X
-      </Button>
-    </div>
+    {:else if !$showSlotBasedViewStore || true}
+      <div class="p-1 md:p-2 flex items-center">
+        <div class="flex flex-col">
+          <div class="text-xl mb-2">{ownedAspect.note}</div>
+          <div class="text-sm">{ownedAspect.note_long || ''}</div>
+        </div>
+        <Button
+          class="ml-auto"
+          color="red"
+          outline
+          on:click={() => deleteOwnedAspect(index)}
+        >
+          X
+        </Button>
+      </div>
+    {/if}
   {/each}
 </div>

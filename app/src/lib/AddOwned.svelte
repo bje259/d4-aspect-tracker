@@ -40,7 +40,6 @@
     'Gravitational',
     "Infiltrator's",
     'of Piercing Cold',
-    'Serpentine',
     'Tidal',
     'Searing Wards',
   ]
