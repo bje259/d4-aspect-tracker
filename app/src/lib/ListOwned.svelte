@@ -30,7 +30,7 @@
 
 <div class="mb-4 grid grid-cols-2 gap-4">
   {#each ownedAspects as ownedAspect, index}
-    {#if $showSlotBasedViewStore && ($slotFilterStore === ' ' || ownedAspect.note
+    <!--{#if $showSlotBasedViewStore && ($slotFilterStore === ' ' || ownedAspect.note
           .toLowerCase()
           .includes($slotFilterStore.toLowerCase()))}
       <div class="p-1 md:p-2 flex items-center">
@@ -46,8 +46,10 @@
         >
           X
         </Button>
-      </div>
-    {:else if !$showSlotBasedViewStore || true}
+      </div>-->
+    {#if !$showSlotBasedViewStore || ownedAspect.note
+        .toLowerCase()
+        .includes($slotFilterStore.toLowerCase())}
       <div class="p-1 md:p-2 flex items-center">
         <div class="flex flex-col">
           <div class="text-xl mb-2">{ownedAspect.note}</div>

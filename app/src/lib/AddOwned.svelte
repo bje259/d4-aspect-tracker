@@ -1,11 +1,11 @@
 <script lang="ts">
   import { Button, Input, Select } from 'flowbite-svelte'
   import { createEventDispatcher } from 'svelte'
-  import type { OwnedAspect } from './types'
+  import type { OwnedAspect, OwnedAspects } from './types'
 
   export let aspectName
   export let aspectCategory
-  export let ownedAspects: OwnedAspect[] = []
+  export let ownedAspects: OwnedAspects = {}
 
   let aspectValue = ''
   let selectedSlot = ''
@@ -153,7 +153,7 @@
     if (ownedAspectData) {
       ownedAspects = JSON.parse(ownedAspectData)
     }
-    ownedAspects.push(ownedAspect)
+    ownedAspects[aspectName].push(ownedAspect)
 
     localStorage.setItem(aspectName, JSON.stringify(ownedAspects))
     dispatch('aspectUpdated')

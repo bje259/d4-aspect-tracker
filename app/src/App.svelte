@@ -12,7 +12,7 @@
     Textarea,
     Button,
   } from 'flowbite-svelte'
-  import type { AspectData, OwnedAspects, OwnedAspect } from './lib/types'
+  import type { AspectData, OwnedAspect, OwnedAspects } from './lib/types'
   import Aspect from './lib/Aspect.svelte'
 
   import { showSlotBasedViewStore, slotFilterStore } from './store.js'
@@ -80,6 +80,9 @@
   let filteredSlot = ''
   let importModal = false
   let exportModal = false
+  import { OwnedAspectsClass } from './lib/OwnedAspectsClass'
+
+  let ownedAspects = new OwnedAspectsClass(loadOwnedAspectsFromLocalStorage())
 
   let open
 
@@ -109,10 +112,13 @@
     }
     localStorage.setItem('_localization', selectedLocalization)
   }
+  let currentSlotFilter = ' '
 
-  let ownedAspects: OwnedAspects = {}
-  let filteredOwned: OwnedAspects = {}
-  $: console.log($showSlotBasedViewStore)
+  //let ownedAs = []
+  let filteredOwned = new OwnedAspectsClass(ownedAspects.getAllOwnedAspects())
+  $: console.log('slotbased' + $showSlotBasedViewStore)
+  $: slotFilterStore.set(currentSlotFilter)
+
   async function getAspects() {
     const aspects_db_url = '/aspects.json'
 
@@ -143,8 +149,8 @@
     localStorage.setItem('_localization', selectedLocalization)
   }
 
-  function loadOwnedAspectsFromLocalStorage() {
-    const loadedOwnedAspects = {}
+  function loadOwnedAspectsFromLocalStorage(): OwnedAspects {
+    const loadedOwnedAspects: OwnedAspects = {}
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i)
@@ -153,6 +159,7 @@
           continue
         }
         const values = localStorage.getItem(key)
+        console.log('loadfromstorage key ' + key)
         if (values) {
           try {
             loadedOwnedAspects[key] = JSON.parse(values)
@@ -183,21 +190,45 @@
     localStorage.removeItem('localization')
 
     // Load owned aspects from local storage
-    ownedAspects = loadOwnedAspectsFromLocalStorage()
+    ownedAspects.updateOwnedAspects(loadOwnedAspectsFromLocalStorage())
   })
-
   // Function to handle the event when a new aspect is added
   function handleAspectUpdated() {
     // Update the local data or trigger a refresh
-    ownedAspects = loadOwnedAspectsFromLocalStorage()
+    ownedAspects.updateOwnedAspects(loadOwnedAspectsFromLocalStorage())
   }
 
   $: if (exportModal) {
     ownedAspectsString = JSON.stringify(loadOwnedAspectsFromLocalStorage())
   }
 
+  $: if (exportModal) {
+    ownedAspectsString = JSON.stringify(loadOwnedAspectsFromLocalStorage())
+  }
+
+  function getAspectsForSlot(currentSlotFilter) {
+    //console.log('Current slot filter:'+currentSlotFilter)
+    //console.log(ownedAs)
+    //filteredOwned is the resulting array of owned aspects for the current slot
+    filteredOwned.updateOwnedAspects(
+      ownedAspects
+        .getAllOwnedAspectsArray()
+        .filter(([key, aspects]) =>
+          aspects.some((aspect) => aspect.note.includes(currentSlotFilter))
+        )
+        .reduce((obj, [key, aspects]) => {
+          obj[key] = aspects
+          return obj
+        }, {})
+    )
+    console.log(filteredOwned.getAllOwnedAspectsArray())
+    return filteredOwned.valid() && false
+  }
+
+  // Filter and sort aspects based on selected class and search term
   $: filteredAspects = aspects
     .filter((aspect) => {
+      console.log('start of fitler' + aspect + ' ' + selectedClass)
       if (selectedClass === '') {
         return true
       } else if (selectedClass === 'All Classes') {
@@ -207,6 +238,20 @@
       }
     })
     .filter((aspect) => {
+      console.log(
+        'midfilter ' +
+          aspect +
+          ' ' +
+          searchTerm +
+          ' ' +
+          selectedLocalization +
+          ' ' +
+          selectedCodex +
+          ' ' +
+          limitToOwned +
+          ' ' +
+          selectedSlot
+      )
       if (searchTerm === '') {
         return true
       }
@@ -233,6 +278,18 @@
       )
     })
     .filter((aspect) => {
+      console.log(
+        'codex' +
+          aspect.in_codex +
+          ' ' +
+          selectedCodex +
+          ' ' +
+          limitToOwned +
+          ' ' +
+          selectedSlot +
+          ' ' +
+          aspect
+      )
       if (selectedCodex === '') {
         return true
       } else if (selectedCodex === 'false') {
@@ -243,11 +300,14 @@
     })
     .filter((aspect) => {
       if (limitToOwned) {
-        return !!ownedAspects[aspect.name]
+        return ownedAspects.getAspectsByName(aspect.name) !== undefined
       }
       return true
     })
     .filter((aspect) => {
+      console.log(
+        'slot filter:' + aspect + ' ' + selectedSlot + ' ' + aspect.category
+      )
       if (selectedSlot === '') {
         return true
       } else if (selectedSlot === 'Helmet') {
@@ -307,7 +367,7 @@
     importAspectsString = ''
     importModal = false
 
-    ownedAspects = loadOwnedAspectsFromLocalStorage()
+    ownedAspects.updateOwnedAspects(loadOwnedAspectsFromLocalStorage())
   }
 
   function copyText(e: MouseEvent): void {
@@ -440,12 +500,14 @@
       <!--<Checkbox bind:checked={showSlotBasedView}>Show Slot Based View</Checkbox>-->
     {/if}
   </div>
-
+  {console.log('another slot based boolean check:' + $showSlotBasedViewStore)}
   {#if $showSlotBasedViewStore}
     {#each realSlots as slot}
       <div class="mb-8 flex flex-col">
-        {#if getAspectsForSlot(slot.value).length > 0}
-          {#each setCurrentSlotFilter(slot.value) as aspect}
+        {#if getAspectsForSlot(slot.value)}
+          <!--{#if filteredOwned.valid()&&}-->
+          {#each filteredOwned.getAllOwnedAspectsArray() as aspect}
+            {console.log('aspect check during slot based cycle:' + aspect)}
             <Aspect
               {aspect}
               {selectedLocalization}
@@ -459,6 +521,12 @@
     <div
       class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
     >
+      {console.log(
+        'filtered aspects: ' +
+          filteredAspects +
+          'length: ' +
+          filteredAspects.length
+      )}
       {#if filteredAspects.length > 0}
         {#each filteredAspects as aspect}
           <Aspect
@@ -472,17 +540,5 @@
       {/if}
     </div>
   {/if}
-
-  <script>
-    // ...
-
-    function setCurrentSlotFilter(slot) {
-      const filteredAspects = ownedAspects.filter(
-        (aspect) => aspect.slot === slot
-      )
-      return filteredAspects
-    }
-
-    // ...
-  </script>
+  {console.log('end of app file')}
 </div>
